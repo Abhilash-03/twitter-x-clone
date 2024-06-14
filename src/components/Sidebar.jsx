@@ -6,7 +6,6 @@ import { HiDotsHorizontal, HiHome } from 'react-icons/hi';
 
 const Sidebar = () => {
   const {data: session} = useSession();
-  console.log(session);
 
   return (
     <div className='flex flex-col justify-between h-screen p-3'>

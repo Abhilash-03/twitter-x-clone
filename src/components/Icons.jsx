@@ -6,7 +6,7 @@ import { signIn, useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { HiHeart, HiOutlineChat, HiOutlineHeart, HiOutlineTrash } from 'react-icons/hi';
 
-export default function Icons({ id }) {
+export default function Icons({ id, uid }) {
   const {data: session} = useSession();
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState([]); 
@@ -27,6 +27,23 @@ export default function Icons({ id }) {
         signIn();
       }
   }
+
+  const deletePost = async() => {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+    if(session?.user?.uid === uid) {
+      await deleteDoc(doc(db, 'posts', id))
+      .then(() => {
+        console.log('Document successfully deleted!');
+        location.reload();
+      })
+      .catch((error) => {
+        console.error('Error removing document: ', error);
+      })
+    } else {
+      alert('You are not authorized to delete this post');
+    }
+  }
+}
 
   useEffect(() => {
     onSnapshot(collection(db, 'posts', id, 'likes'), (snapshot) => {
@@ -59,7 +76,12 @@ export default function Icons({ id }) {
           </span>
         )}
       </div>
-      <HiOutlineTrash className='h-8 w-8 cursor-pointer rounded-full  transition duration-500 ease-in-out p-2 hover:text-red-500 hover:bg-red-100' />
+      {session?.user?.uid === uid && (
+        <HiOutlineTrash
+          className='h-8 w-8 cursor-pointer rounded-full  transition duration-500 ease-in-out p-2 hover:text-red-500 hover:bg-red-100'
+          onClick={deletePost}
+        />
+      )}
     </div>
   );
 }

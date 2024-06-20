@@ -12,6 +12,8 @@ export const metadata = {
   description: "This app is clone of twitter-x.com or x.com which is built on next.js and tailwindcss.",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({ children }) {
   return (
     <SessionWrapper>

@@ -6,8 +6,9 @@ import Modal from 'react-modal';
 import { HiX } from "react-icons/hi";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { doc, getFirestore, onSnapshot } from "firebase/firestore";
+import { addDoc, collection, doc, getFirestore, onSnapshot, serverTimestamp } from "firebase/firestore";
 import { app } from "@/firebase";
+import { useRouter } from "next/navigation";
 
 
 const CommentModal = () => {
@@ -17,6 +18,7 @@ const CommentModal = () => {
     const [post, setPost] = useState({});
     const {data: session} = useSession();
    const db = getFirestore(app);
+   const router = useRouter();
 
     useEffect(() => {
       if(postId !== '') {
@@ -31,6 +33,25 @@ const CommentModal = () => {
         return () => unsubscribe();
       }
     }, [postId])
+
+    const sendComment = async() => {
+       addDoc(collection(db, 'posts', postId, 'comments'), {
+        name: session.user.name,
+        username: session.user.username,
+        userImg: session.user.image,
+        comment: input,
+        timestamp: serverTimestamp(),
+
+       })
+       .then(() => {
+        setInput('');
+        setOpen(false);
+        router.push(`/posts/${postId}`);
+       })
+       .catch((error) => {
+        console.error('Error adding document: ', error);
+      });
+    }
 
   return (
     <div>
@@ -85,6 +106,7 @@ const CommentModal = () => {
                   <button
                     className='bg-blue-400 text-white px-4 py-1.5 rounded-full font-bold shadow-md hover:brightness-95 disabled:opacity-50'
                     disabled={input.trim() === ''}
+                    onClick={sendComment}
                   >
                     Reply
                   </button>
